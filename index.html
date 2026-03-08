@@ -315,6 +315,7 @@ body.admin-mode .add-card{display:flex;}
         <div class="poll-timer" id="pollTimer">Cek otomatis setiap 10 detik</div>
       </div>
       <button id="manualCheckBtn" style="background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.22);color:var(--gold);font-weight:700;font-size:.8rem;padding:12px;border-radius:12px;cursor:pointer;font-family:'Outfit',sans-serif;width:100%;">🔄 Cek Status Sekarang</button>
+      <button onclick="hubungiAdmin()" style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:var(--green);font-weight:700;font-size:.78rem;padding:11px;border-radius:12px;cursor:pointer;font-family:'Outfit',sans-serif;width:100%;">💬 Ada kendala? Hubungi Admin</button>
     </div>
   </div>
 </div>
@@ -334,6 +335,7 @@ body.admin-mode .add-card{display:flex;}
       <div style="background:var(--sec);border:1px solid var(--border);border-radius:var(--card-r);padding:16px;width:100%;margin-bottom:16px;">
         <div style="font-size:.72rem;color:var(--hint);line-height:1.9;font-family:'Courier New',monospace;white-space:pre-wrap;" id="successDetail"></div>
       </div>
+      <button id="successAdminBtn" onclick="hubungiAdmin()" style="display:none;width:100%;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.22);color:var(--gold);font-weight:700;font-size:.85rem;padding:12px;border-radius:12px;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:10px;">💬 Ada masalah? Hubungi Admin</button>
       <button class="back-home-btn" onclick="goHome()">🏠 Kembali ke Beranda</button>
     </div>
   </div>
@@ -348,7 +350,8 @@ body.admin-mode .add-card{display:flex;}
       <div class="admin-cfg-row"><div class="admin-cfg-ico">💳</div><div class="admin-cfg-info"><div class="admin-cfg-lbl">Payment Gateway</div><div class="admin-cfg-val">Maelyn → Saweria QRIS</div></div></div>
       <div class="admin-cfg-row"><div class="admin-cfg-ico">🔑</div><div class="admin-cfg-info"><div class="admin-cfg-lbl">Maelyn API Key</div><div class="admin-cfg-val" id="cfgMaelyStatus">—</div></div></div>
       <div class="admin-cfg-row"><div class="admin-cfg-ico">👤</div><div class="admin-cfg-info"><div class="admin-cfg-lbl">Saweria Username</div><div class="admin-cfg-val" id="cfgSaweriaStatus">—</div></div></div>
-      <div class="admin-cfg-row" style="margin-bottom:16px;"><div class="admin-cfg-ico">🤖</div><div class="admin-cfg-info"><div class="admin-cfg-lbl">Telegram Bot Token</div><div class="admin-cfg-val" id="cfgBotStatus">—</div></div></div>
+      <div class="admin-cfg-row"><div class="admin-cfg-ico">🤖</div><div class="admin-cfg-info"><div class="admin-cfg-lbl">Telegram Bot Token</div><div class="admin-cfg-val" id="cfgBotStatus">—</div></div></div>
+      <div class="admin-cfg-row" style="margin-bottom:16px;"><div class="admin-cfg-ico">💬</div><div class="admin-cfg-info"><div class="admin-cfg-lbl">Admin Telegram</div><div class="admin-cfg-val" id="cfgAdminTgStatus">—</div></div></div>
 
       <!-- Admin panel (hidden until login) -->
       <div id="adminConfigPanel" style="display:none;">
@@ -385,6 +388,7 @@ body.admin-mode .add-card{display:flex;}
           <div class="cfg-section-title">ℹ️ BRANDING</div>
           <div class="sfg"><label>Nama Aplikasi</label><input type="text" id="setCfgAppName" placeholder="VIP Hunter"/></div>
           <div class="sfg"><label>Watermark</label><input type="text" id="setCfgWatermark" placeholder="@nama_toko"/></div>
+          <div class="sfg"><label>Username Telegram Admin (tanpa @)</label><input type="text" id="setCfgAdminTg" placeholder="username_admin"/><div class="hint" style="margin-top:5px;">Digunakan untuk tombol <strong>Hubungi Admin</strong> yang muncul saat ada trouble order.</div></div>
         </div>
 
         <button class="save-btn" id="saveCfgBtn" style="width:100%;margin-bottom:16px;">💾 Simpan Semua Pengaturan</button>
@@ -410,6 +414,7 @@ body.admin-mode .add-card{display:flex;}
 <div class="bottom-nav" id="bottomNav">
   <div class="bn-item active" id="nav-shop" onclick="navTo('s-shop','nav-shop')"><span class="bn-icon">👑</span><span class="bn-label">PAKET</span></div>
   <div class="bn-item" id="nav-cart" onclick="navTo('s-cart','nav-cart')"><span class="bn-icon">🛒</span><span class="bn-label">KERANJANG</span><span class="bn-badge" id="cartBadge">0</span></div>
+  <div class="bn-item" id="nav-admin" onclick="hubungiAdmin()"><span class="bn-icon">💬</span><span class="bn-label">ADMIN</span></div>
   <div class="bn-item" id="nav-settings" onclick="navTo('s-settings','nav-settings')"><span class="bn-icon">⚙️</span><span class="bn-label">SETTING</span></div>
 </div>
 
@@ -462,15 +467,18 @@ body.admin-mode .add-card{display:flex;}
     <div class="sfg"><label>Fitur (1 baris = 1 fitur)</label><textarea id="fFeats" placeholder="Akses semua konten VIP&#10;Update setiap hari&#10;Priority support"></textarea></div>
 
     <div class="sfg">
-      <label>Link / Channel VIP (Multi) *</label>
+      <label>Channel VIP (Multi) *</label>
       <div class="hint" style="margin-bottom:8px;">
-        <strong>Format tiap baris:</strong> NamaLink|https://link|chat_id (opsional)<br/>
-        <strong>Tanpa bot token:</strong> NamaLink|https://t.me/+xxxxx<br/>
-        <strong>Dengan bot token (invite sekali pakai):</strong> NamaLink|https://t.me/+xxxxx|-1001234567890<br/>
-        Chat ID diperlukan agar bot bisa generate invite link baru yang hanya bisa dipakai 1 orang.
+        <strong>Format tiap baris:</strong> NamaChannel|ChatID<br/>
+        Bot akan otomatis generate <strong>invite link sekali pakai</strong> saat pelanggan bayar.<br/><br/>
+        <strong>Contoh:</strong><br/>
+        Channel Utama|-1001234567890<br/>
+        Grup Bonus|-1009876543210<br/><br/>
+        💡 Chat ID channel biasanya diawali <strong>-100...</strong><br/>
+        Dapatkan Chat ID via @userinfobot atau @getidsbot di Telegram.
       </div>
-      <textarea id="fVipLinks" rows="5" placeholder="Channel Utama|https://t.me/+xxxxx|-1001234567890&#10;Grup Bonus|https://t.me/+yyyyy|-1009876543210&#10;Link Biasa|https://t.me/joinchat/zzz"></textarea>
-      <div style="font-size:.63rem;color:var(--hint);margin-top:4px;">💡 Jika chat_id diisi & bot token dikonfigurasi → invite link sekali pakai otomatis digenerate tiap order.</div>
+      <textarea id="fVipLinks" rows="4" placeholder="Channel Utama|-1001234567890&#10;Grup Bonus|-1009876543210&#10;Channel Extra|-1001122334455"></textarea>
+      <div style="font-size:.63rem;color:var(--hint);margin-top:4px;">🔒 Link invite <strong>sekali pakai</strong> digenerate otomatis oleh bot setiap ada order masuk — tidak bisa dishare ulang.</div>
     </div>
 
     <div class="btn-row">
@@ -499,13 +507,14 @@ body.admin-mode .add-card{display:flex;}
 // ══════════════════════════════════════════════════════
 var CFG = {
   adminPassword: 'admin123',
-  supabaseUrl:   '',
-  supabaseKey:   '',
+  supabaseUrl:   'https://lgnkdftvfkwfiaeaaqwf.supabase.co',
+  supabaseKey:   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnbmtkZnR2Zmt3ZmlhZWFhcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NzM3ODMsImV4cCI6MjA4ODU0OTc4M30.izYzQotTmlvP5unSGi0plRHoUjHpBCWg9RMUyaPgzfk',
   watermark:     '@vip_hunter',
   appName:       'VIP Hunter',
   maelyApiKey:   '',
   maelyQrisId:   '',
   botToken:      '',
+  adminTg:       '',
   pollInterval:  10000,
   qrisDuration:  60,
 };
@@ -570,6 +579,7 @@ async function loadRemoteCFG() {
     if (map.poll_interval)   CFG.pollInterval   = parseInt(map.poll_interval)||10000;
     if (map.watermark)       CFG.watermark      = map.watermark;
     if (map.app_name)        CFG.appName        = map.app_name;
+    if (map.admin_tg)        CFG.adminTg        = map.admin_tg;
     saveLocalCFG();
     applyBranding();
   } catch(e) { console.warn('loadRemoteCFG error', e); }
@@ -589,6 +599,7 @@ async function persistCFG(patch) {
     pollInterval:  'poll_interval',
     watermark:     'watermark',
     appName:       'app_name',
+    adminTg:       'admin_tg',
   };
   for (var k in patch) {
     if (keyMap[k]) await cfgSet(keyMap[k], patch[k]);
@@ -660,24 +671,25 @@ async function tgGenerateInviteLink(chatId, productName) {
 
 // ══════════════════════════════════════════════════════
 // PARSE VIP LINKS
-// Format: "Nama|https://link|chat_id" atau "Nama|https://link"
+// Format baru: "NamaChannel|ChatID" — bot generate link saat payment sukses
+// Contoh: "Channel Utama|-1001234567890"
 // ══════════════════════════════════════════════════════
 function parseVipLinks(raw) {
   if (!raw) return [];
   return raw.split('\n').map(function(line){
     line = line.trim(); if (!line) return null;
-    var parts = line.split('|');
-    var name    = (parts[0]||'Link VIP').trim();
-    var link    = (parts[1]||'').trim();
-    var chat_id = (parts[2]||'').trim();
-    if (!link) return null;
-    return { name:name, link:link, chat_id:chat_id||'' };
+    var pipe = line.indexOf('|');
+    if (pipe === -1) return null; // harus ada pemisah
+    var name    = line.slice(0, pipe).trim();
+    var chat_id = line.slice(pipe+1).trim();
+    if (!name || !chat_id) return null;
+    return { name:name, chat_id:chat_id, link:'' }; // link dikosongkan, digenerate saat order
   }).filter(Boolean);
 }
 
 function serializeVipLinks(arr) {
   if (!arr||!arr.length) return '';
-  return arr.map(function(x){ return x.name+'|'+x.link+(x.chat_id?'|'+x.chat_id:''); }).join('\n');
+  return arr.map(function(x){ return x.name+'|'+x.chat_id; }).join('\n');
 }
 
 // ══════════════════════════════════════════════════════
@@ -700,6 +712,17 @@ function fmtRp(n){return 'Rp '+n.toLocaleString('id-ID');}
 function escHtml(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function togglePw(id){var i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
 
+// ══════════════════════════════════════════════════════
+// HUBUNGI ADMIN
+// ══════════════════════════════════════════════════════
+function hubungiAdmin() {
+  if (!CFG.adminTg) {
+    toast('❌ Admin belum dikonfigurasi', 'err');
+    return;
+  }
+  window.open('https://t.me/' + CFG.adminTg, '_blank');
+}
+
 function applyBranding() {
   var wm=document.getElementById('watermarkEl');
   var an=document.getElementById('appNameEl');
@@ -712,9 +735,11 @@ function updateCfgStatus() {
   var mk=document.getElementById('cfgMaelyStatus');
   var sw=document.getElementById('cfgSaweriaStatus');
   var bt=document.getElementById('cfgBotStatus');
+  var at=document.getElementById('cfgAdminTgStatus');
   if(mk) mk.textContent = CFG.maelyApiKey ? CFG.maelyApiKey.slice(0,10)+'...' : '⚠️ Belum diisi';
   if(sw) sw.textContent = CFG.maelyQrisId || '⚠️ Belum diisi';
   if(bt) bt.textContent = CFG.botToken ? CFG.botToken.split(':')[0]+':*****' : 'Tidak digunakan';
+  if(at) at.textContent = CFG.adminTg ? '@'+CFG.adminTg : '⚠️ Belum diisi';
   // Show setup banner if not configured
   var banner = document.getElementById('setupBanner');
   if(banner) banner.style.display = (!CFG.maelyApiKey||!CFG.maelyQrisId) ? 'flex' : 'none';
@@ -937,29 +962,40 @@ async function onPaymentSuccess(orderId, transactionId) {
     for (var ci=0; ci<currentCartSnapshot.length; ci++) {
       var item = currentCartSnapshot[ci];
       var links = item.vip_links || [];
-      // backward compat
+      // backward compat: jika data lama punya vip_link string
       if(!links.length && item.vip_link) links=[{name:item.name,link:item.vip_link,chat_id:''}];
 
       for (var li=0; li<links.length; li++) {
         var lnk = links[li];
-        var finalLink = lnk.link;
-        var isOnce   = false;
+        var finalLink = null;
+        var isOnce    = false;
 
-        // If chat_id provided and bot configured → generate invite link sekali pakai
+        // Selalu generate invite link via bot jika chat_id tersedia
         if (lnk.chat_id && CFG.botToken) {
           var generated = await tgGenerateInviteLink(lnk.chat_id, item.name + ' - ' + lnk.name);
           if (generated) {
             finalLink = generated;
             isOnce    = true;
             hasOnceLlinks = true;
-            // Save to DB
             if(hasSB()){
               try{await sbPost('used_invite_links',{order_id:orderId,chat_id:lnk.chat_id,invite_link:generated,product_name:item.name+' – '+lnk.name,created_at:new Date().toISOString()});}
               catch(e){console.warn('save invite link error',e);}
             }
+          } else {
+            // Bot gagal generate — fallback info
+            finalLink = null;
           }
+        } else if (lnk.link) {
+          // Fallback: jika ada link statis (data lama)
+          finalLink = lnk.link;
         }
-        resolvedLinks.push({ name:lnk.name, link:finalLink, once:isOnce });
+
+        if (finalLink) {
+          resolvedLinks.push({ name:lnk.name, link:finalLink, once:isOnce });
+        } else {
+          // Tidak bisa generate link — tandai sebagai error
+          resolvedLinks.push({ name:lnk.name, link:'', once:false, error:true });
+        }
       }
     }
 
@@ -983,26 +1019,28 @@ function showSuccessScreen(orderId, vipLinks, hasOnceLinks) {
   var ts=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('successDetail').textContent='📦 ORDER ID : '+orderId+'\n💰 Total    : '+fmtRp(cartTotal())+'\n👤 Pembeli  : '+buyerName+'\n🗓 Waktu    : '+ds+' '+ts+'\n✅ Status   : LUNAS';
 
+  var adminBtn=document.getElementById('successAdminBtn');
+  if(adminBtn) adminBtn.style.display=CFG.adminTg?'block':'none';
   var linksBox=document.getElementById('successLinksBox');
   var linksList=document.getElementById('successLinksList');
   var linksNote=document.getElementById('successLinksNote');
 
   if(vipLinks&&vipLinks.length){
     linksList.innerHTML=vipLinks.map(function(item){
-      var badge=item.once
-        ? '<span class="vip-link-badge badge-once">SEKALI PAKAI</span>'
-        : '<span class="vip-link-badge badge-static">LINK TETAP</span>';
+      if(item.error){
+        return '<div class="vip-link-item" style="opacity:.5;cursor:default;">'
+          +'<span class="vip-link-ico">⚠️</span>'
+          +'<div class="vip-link-info"><div class="vip-link-name">'+escHtml(item.name)+'</div><div class="vip-link-url" style="color:var(--red);">Gagal generate link — hubungi admin</div></div>'
+          +'</div>';
+      }
       return '<a class="vip-link-item" href="'+item.link+'" target="_blank">'
         +'<span class="vip-link-ico">🔗</span>'
         +'<div class="vip-link-info"><div class="vip-link-name">'+escHtml(item.name)+'</div><div class="vip-link-url">'+item.link+'</div></div>'
-        +badge+'<span class="vip-link-arrow">→</span></a>';
+        +'<span class="vip-link-badge badge-once">SEKALI PAKAI</span>'
+        +'<span class="vip-link-arrow">→</span></a>';
     }).join('');
     linksBox.style.display='block';
-    if(hasOnceLinks){
-      linksNote.innerHTML='⚠️ <strong style="color:var(--red)">Link bertanda SEKALI PAKAI</strong> hanya bisa dipakai 1 kali oleh 1 orang. Langsung klik & join sekarang!';
-    } else {
-      linksNote.textContent='Klik link di atas untuk bergabung ke channel VIP kamu.';
-    }
+    linksNote.innerHTML='⚠️ <strong style="color:var(--red)">Link hanya bisa dipakai 1 kali</strong> — langsung klik & join sekarang! Link akan hangus setelah digunakan.';
   } else {
     linksBox.style.display='none';
   }
@@ -1028,7 +1066,7 @@ function prefillAdminForm(){
   f('setCfgSbUrl',CFG.supabaseUrl);f('setCfgSbKey',CFG.supabaseKey);
   f('setCfgMaelyKey',CFG.maelyApiKey);f('setCfgSaweriaUser',CFG.maelyQrisId);
   f('setCfgQrisDur',CFG.qrisDuration||60);f('setCfgBotToken',CFG.botToken);
-  f('setCfgPw','');f('setCfgAppName',CFG.appName);f('setCfgWatermark',CFG.watermark);
+  f('setCfgPw','');f('setCfgAppName',CFG.appName);f('setCfgWatermark',CFG.watermark);f('setCfgAdminTg',CFG.adminTg);
 }
 document.getElementById('keyBtn').onclick=function(){if(isAdmin)openAddModal();else{openModal('loginModal');setTimeout(function(){document.getElementById('pwInput').focus();},200);}};
 document.getElementById('logoutBtn').onclick=function(){setAdmin(false);toast('Logout berhasil');};
@@ -1064,6 +1102,7 @@ document.getElementById('saveCfgBtn').addEventListener('click', async function()
     botToken:      (document.getElementById('setCfgBotToken').value||'').trim(),
     appName:       (document.getElementById('setCfgAppName').value||'').trim()||'VIP Hunter',
     watermark:     (document.getElementById('setCfgWatermark').value||'').trim(),
+    adminTg:       (document.getElementById('setCfgAdminTg').value||'').trim().replace(/^@/,''),
   };
   if(newPw) patch.adminPassword=newPw;
   await persistCFG(patch);
@@ -1089,7 +1128,7 @@ function openEditModal(id){
   document.getElementById('fFeats').value=(p.features||[]).join('\n');
   var linksRaw='';
   if(p.vip_links&&p.vip_links.length) linksRaw=serializeVipLinks(p.vip_links);
-  else if(p.vip_link) linksRaw='Link VIP|'+p.vip_link;
+  else if(p.vip_link) linksRaw='Link VIP|'; // vip_link lama tidak punya chat_id, biarkan kosong
   document.getElementById('fVipLinks').value=linksRaw;
   if(p.img){uploadedImg=p.img;var pv=document.getElementById('imgPreview');pv.src=p.img;pv.style.display='block';document.getElementById('imgUpload').querySelector('.up-ico').style.display='none';document.getElementById('imgUpload').querySelector('.up-hint').style.display='none';}
   document.getElementById('modalTitle').textContent='EDIT PAKET';document.getElementById('modalSub').textContent='Ubah data lalu simpan.';document.getElementById('saveProd').textContent='💾 Simpan Perubahan';openModal('prodModal');
@@ -1101,7 +1140,7 @@ document.getElementById('saveProd').addEventListener('click',async function(){
   var fr=document.getElementById('fFeats').value.trim();
   var linksRaw=document.getElementById('fVipLinks').value.trim();
   var vipLinksArr=parseVipLinks(linksRaw);
-  var data={name:name,tier:document.getElementById('fTier').value,price:document.getElementById('fPrice').value.trim()||'0',per:document.getElementById('fPer').value.trim()||'',description:desc,features:fr?fr.split('\n').map(function(f){return f.trim();}).filter(Boolean):[],img:uploadedImg,vip_links:vipLinksArr,vip_link:vipLinksArr.length?vipLinksArr[0].link:''};
+  var data={name:name,tier:document.getElementById('fTier').value,price:document.getElementById('fPrice').value.trim()||'0',per:document.getElementById('fPer').value.trim()||'',description:desc,features:fr?fr.split('\n').map(function(f){return f.trim();}).filter(Boolean):[],img:uploadedImg,vip_links:vipLinksArr,vip_link:''};
   try{
     if(isEdit){await sbPatch('vip_packages',document.getElementById('fId').value,data);toast('✅ Paket diperbarui!','ok');}
     else{data.id='vip_'+Date.now();var r=await fetch(getSB()+'/vip_packages',{method:'POST',headers:Object.assign({'Prefer':'return=representation'},getSBH()),body:JSON.stringify(data)});if(!r.ok)throw new Error(await r.text());toast('✅ Paket ditambahkan!','ok');}
