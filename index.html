@@ -393,6 +393,8 @@ body.admin-mode .add-card{display:flex;}
 
         <button class="save-btn" id="saveCfgBtn" style="width:100%;margin-bottom:16px;">💾 Simpan Semua Pengaturan</button>
         <button id="logoutBtn" style="width:100%;background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);color:var(--red);font-weight:700;font-size:.85rem;padding:11px;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:8px;">🚪 Logout Admin</button>
+        <button id="testSbBtn" style="width:100%;background:rgba(122,122,154,.08);border:1px solid rgba(122,122,154,.25);color:var(--hint);font-weight:700;font-size:.82rem;padding:11px;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:8px;">🔍 Test Koneksi Supabase</button>
+        <div id="testSbResult" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.72rem;font-family:'Courier New',monospace;word-break:break-all;line-height:1.6;color:var(--hint);margin-bottom:8px;"></div>
       </div>
 
       <div id="settingsLoginHint" style="text-align:center;padding:16px 0;">
@@ -547,8 +549,8 @@ async function sbFetch(url,opts,ms){
   catch(e){clearTimeout(tid);throw e;}
 }
 async function sbGet(tbl,q){var r=await sbFetch(getSB()+'/'+tbl+(q||'?select=*&order=created_at.asc'),{headers:getSBH()});if(!r.ok)throw new Error(await r.text());return r.json();}
-async function sbPost(tbl,d){var h=Object.assign({'Prefer':'return=representation','Accept':'application/json'},getSBH());var r=await sbFetch(getSB()+'/'+tbl,{method:'POST',headers:h,body:JSON.stringify(d)});if(!r.ok){var et=await r.text();throw new Error('HTTP '+r.status+': '+et);}return r.json();}
-async function sbPatch(tbl,id,d){var h=Object.assign({'Prefer':'return=minimal','Accept':'application/json'},getSBH());var r=await sbFetch(getSB()+'/'+tbl+'?id=eq.'+id,{method:'PATCH',headers:h,body:JSON.stringify(d)});if(!r.ok){var et=await r.text();throw new Error('HTTP '+r.status+': '+et);}}
+async function sbPost(tbl,d){var h=Object.assign({'Prefer':'return=representation','Accept':'application/json'},getSBH());var r=await sbFetch(getSB()+'/'+tbl,{method:'POST',headers:h,body:JSON.stringify(d)});if(!r.ok){var et=await r.text();var em=et.replace(/<[^>]*>/g,'').substring(0,120);throw new Error('HTTP '+r.status+': '+em);}var ct=r.headers.get('content-type');if(ct&&ct.includes('json'))return r.json();return[];}
+async function sbPatch(tbl,id,d){var h=Object.assign({'Prefer':'return=minimal'},getSBH());var r=await sbFetch(getSB()+'/'+tbl+'?id=eq.'+id,{method:'PATCH',headers:h,body:JSON.stringify(d)});if(!r.ok){var et=await r.text();var em=et.replace(/<[^>]*>/g,'').substring(0,120);throw new Error('HTTP '+r.status+': '+em);}}
 async function sbDelete(tbl,id){var r=await sbFetch(getSB()+'/'+tbl+'?id=eq.'+id,{method:'DELETE',headers:getSBH()});if(!r.ok)throw new Error(await r.text());}
 
 // Upsert app_config key
@@ -1070,6 +1072,48 @@ function prefillAdminForm(){
 }
 document.getElementById('keyBtn').onclick=function(){if(isAdmin)openAddModal();else{openModal('loginModal');setTimeout(function(){document.getElementById('pwInput').focus();},200);}};
 document.getElementById('logoutBtn').onclick=function(){setAdmin(false);toast('Logout berhasil');};
+
+// Test Supabase connection
+document.getElementById('testSbBtn').addEventListener('click', async function(){
+  var res=document.getElementById('testSbResult');
+  res.style.display='block';
+  res.style.color='var(--hint)';
+  res.textContent='⏳ Testing...';
+  var url=getSB()+'/vip_packages?select=id&limit=1';
+  res.textContent='URL: '+url+'\n\n⏳ Connecting...';
+  try{
+    var r=await fetch(url,{headers:getSBH()});
+    var txt=await r.text();
+    if(r.ok){
+      res.style.color='var(--green)';
+      res.textContent='✅ GET OK ('+r.status+')\n\nResponse: '+txt.substring(0,200);
+      // Now test POST
+      res.textContent+='\n\n⏳ Testing POST...';
+      var testId='test_'+Date.now();
+      var r2=await fetch(getSB()+'/vip_packages',{
+        method:'POST',
+        headers:Object.assign({'Prefer':'return=representation'},getSBH()),
+        body:JSON.stringify({id:testId,name:'TEST DELETE ME',description:'test',tier:'tier-gold',price:'0'})
+      });
+      var txt2=await r2.text();
+      if(r2.ok){
+        res.textContent+='\n✅ POST OK ('+r2.status+')';
+        // Cleanup
+        await fetch(getSB()+'/vip_packages?id=eq.'+testId,{method:'DELETE',headers:getSBH()});
+        res.textContent+='\n✅ DELETE OK\n\n🎉 Supabase fully working!';
+      } else {
+        res.style.color='var(--red)';
+        res.textContent+='\n❌ POST FAILED ('+r2.status+')\n'+txt2.replace(/<[^>]*>/g,'').substring(0,300);
+      }
+    } else {
+      res.style.color='var(--red)';
+      res.textContent='❌ GET FAILED ('+r.status+')\n\n'+txt.replace(/<[^>]*>/g,'').substring(0,300);
+    }
+  }catch(e){
+    res.style.color='var(--red)';
+    res.textContent='❌ ERROR: '+e.message;
+  }
+});
 function doLogin(){
   var pw=document.getElementById('pwInput').value;
   if(pw===CFG.adminPassword){
@@ -1142,6 +1186,7 @@ document.getElementById('saveProd').addEventListener('click',async function(){
   var vipLinksArr=parseVipLinks(linksRaw);
   var data={name:name,tier:document.getElementById('fTier').value,price:document.getElementById('fPrice').value.trim()||'0',per:document.getElementById('fPer').value.trim()||'',description:desc,features:fr?fr.split('\n').map(function(f){return f.trim();}).filter(Boolean):[],img:uploadedImg,vip_links:vipLinksArr,vip_link:''};
   try{
+    console.log('[saveProd] URL:',getSB()+'/vip_packages','isEdit:',isEdit,'id:',document.getElementById('fId').value);
     if(isEdit){await sbPatch('vip_packages',document.getElementById('fId').value,data);toast('✅ Paket diperbarui!','ok');}
     else{data.id='vip_'+Date.now();await sbPost('vip_packages',data);toast('✅ Paket ditambahkan!','ok');}
     closeModal('prodModal');await loadVIP();
