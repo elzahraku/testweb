@@ -341,7 +341,7 @@ body.admin-mode .add-card{display:flex;}
         <div class="cfg-section">
           <div class="cfg-section-title">&#x1F916; TELEGRAM BOT</div>
           <div class="sfg"><label>Bot Token</label><div class="pw-wrap"><input type="password" id="setCfgBotToken" placeholder="1234567890:AAF..."/><button class="pw-eye" onclick="togglePw('setCfgBotToken')">&#x1F441;&#xFE0F;</button></div><div class="hint" style="margin-top:6px;">Bot ini yang kirim notifikasi ke admin &amp; generate invite link.</div></div>
-          <div class="sfg"><label>Admin Chat ID / Username (tanpa @)</label><input type="text" id="setCfgAdminTg" placeholder="5918905984"/><div class="hint" style="margin-top:6px;">Pakai <strong>Chat ID numerik</strong> (lebih reliable). Dapatkan via @userinfobot di Telegram.</div></div>
+          <div class="sfg"><label>Admin Chat ID / Username (tanpa @)</label><input type="text" id="setCfgAdminTg" placeholder="5918905984"/><div class="hint" style="margin-top:6px;">Pakai <strong>username</strong> (misal: johndoe) agar tombol Hubungi Admin bisa diklik. Atau <strong>Chat ID numerik</strong> untuk notifikasi bot saja — dapatkan via @userinfobot.</div></div>
         </div>
         <div class="cfg-section">
           <div class="cfg-section-title">&#x1F510; KEAMANAN</div>
@@ -498,7 +498,7 @@ function parseNum(s){return parseInt((s||'0').replace(/[^0-9]/g,''))||0;}
 function fmtRp(n){return 'Rp '+n.toLocaleString('id-ID');}
 function escHtml(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function togglePw(id){var i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
-function hubungiAdmin(){if(!CFG.adminTg){toast('Admin belum dikonfigurasi','err');return;}window.open('https://t.me/'+CFG.adminTg,'_blank');}
+function hubungiAdmin(){if(!CFG.adminTg){toast('Admin belum dikonfigurasi','err');return;}var tg=CFG.adminTg.replace(/^@/,'');if(/^\-?\d+$/.test(tg)){toast('Hubungi admin di Telegram (ID: '+tg+')','ok');}else{window.open('https://t.me/'+tg,'_blank');}}
 function applyBranding(){var wm=document.getElementById('watermarkEl'),an=document.getElementById('appNameEl');if(wm&&CFG.watermark)wm.textContent=CFG.watermark;if(an&&CFG.appName)an.textContent=CFG.appName;document.title=CFG.appName||'VIP Hunter';}
 function updateCfgStatus(){var sw=document.getElementById('cfgSaweriaStatus'),bt=document.getElementById('cfgBotStatus'),at=document.getElementById('cfgAdminTgStatus');if(sw)sw.textContent=CFG.saweriaUsername||'Belum diisi';if(bt)bt.textContent=CFG.botToken?CFG.botToken.split(':')[0]+':*****':'Tidak digunakan';if(at)at.textContent=CFG.adminTg||'Belum diisi';var b=document.getElementById('setupBanner');if(b)b.style.display=!CFG.saweriaUsername?'flex':'none';}
 var currentScreen='s-shop';
