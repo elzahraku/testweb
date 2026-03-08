@@ -341,7 +341,7 @@ body.admin-mode .add-card{display:flex;}
         <div class="cfg-section">
           <div class="cfg-section-title">&#x1F916; TELEGRAM BOT</div>
           <div class="sfg"><label>Bot Token</label><div class="pw-wrap"><input type="password" id="setCfgBotToken" placeholder="1234567890:AAF..."/><button class="pw-eye" onclick="togglePw('setCfgBotToken')">&#x1F441;&#xFE0F;</button></div><div class="hint" style="margin-top:6px;">Bot ini yang kirim notifikasi ke admin &amp; generate invite link.</div></div>
-          <div class="sfg"><label>Admin Chat ID / Username (tanpa @)</label><input type="text" id="setCfgAdminTg" placeholder="5918905984"/><div class="hint" style="margin-top:6px;">Support <strong>Chat ID numerik</strong> (misal: 591890598) <em>atau</em> <strong>username</strong> (misal: @johndoe). Keduanya bisa untuk notifikasi bot & tombol Hubungi Admin.</div></div>
+          <div class="sfg"><label>Admin Chat ID / Username (tanpa @)</label><input type="text" id="setCfgAdminTg" placeholder="5918905984"/><div class="hint" style="margin-top:6px;">Pakai <strong>username</strong> (misal: johndoe) agar tombol Hubungi Admin bisa diklik. Atau <strong>Chat ID numerik</strong> untuk notifikasi bot saja — dapatkan via @userinfobot.</div></div>
         </div>
         <div class="cfg-section">
           <div class="cfg-section-title">&#x1F510; KEAMANAN</div>
@@ -442,8 +442,8 @@ body.admin-mode .add-card{display:flex;}
 <div class="watermark" id="watermarkEl"></div>
 <script>
 var CFG={adminPassword:'admin123',supabaseUrl:'https://lgnkdftvfkwfiaeaaqwf.supabase.co',supabaseKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnbmtkZnR2Zmt3ZmlhZWFhcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NzM3ODMsImV4cCI6MjA4ODU0OTc4M30.izYzQotTmlvP5unSGi0plRHoUjHpBCWg9RMUyaPgzfk',watermark:'@vip_hunter',appName:'VIP Hunter',saweriaUsername:'',saweriaUserId:'',botToken:'',adminTg:'',pollInterval:10000,qrisDuration:60};
-function loadLocalCFG(){try{var s=localStorage.getItem('vhcfg');if(s){var saved=JSON.parse(s);if(saved.supabaseUrl)CFG.supabaseUrl=saved.supabaseUrl;if(saved.supabaseKey)CFG.supabaseKey=saved.supabaseKey;}}catch(e){}}
-function saveLocalCFG(){try{localStorage.setItem('vhcfg',JSON.stringify({supabaseUrl:CFG.supabaseUrl,supabaseKey:CFG.supabaseKey}));}catch(e){}}
+function loadLocalCFG(){try{var s=localStorage.getItem('vhcfg');if(s){var saved=JSON.parse(s);if(saved.supabaseUrl)CFG.supabaseUrl=saved.supabaseUrl;if(saved.supabaseKey)CFG.supabaseKey=saved.supabaseKey;if(saved.saweriaUsername)CFG.saweriaUsername=saved.saweriaUsername;if(saved.saweriaUserId)CFG.saweriaUserId=saved.saweriaUserId;if(saved.botToken)CFG.botToken=saved.botToken;if(saved.adminTg)CFG.adminTg=saved.adminTg;if(saved.qrisDuration)CFG.qrisDuration=saved.qrisDuration;if(saved.watermark)CFG.watermark=saved.watermark;if(saved.appName)CFG.appName=saved.appName;if(saved.adminPassword)CFG.adminPassword=saved.adminPassword;}}catch(e){}}
+function saveLocalCFG(){try{localStorage.setItem('vhcfg',JSON.stringify({supabaseUrl:CFG.supabaseUrl,supabaseKey:CFG.supabaseKey,saweriaUsername:CFG.saweriaUsername,saweriaUserId:CFG.saweriaUserId,botToken:CFG.botToken,adminTg:CFG.adminTg,qrisDuration:CFG.qrisDuration,watermark:CFG.watermark,appName:CFG.appName,adminPassword:CFG.adminPassword}));}catch(e){}}
 loadLocalCFG();
 function getSB(){return (CFG.supabaseUrl||'').replace(/\/$/,'')+'/rest/v1';}
 function getSBH(){return {'apikey':CFG.supabaseKey,'Authorization':'Bearer '+CFG.supabaseKey,'Content-Type':'application/json'};}
@@ -473,9 +473,7 @@ async function notifyAdmin(orderId,items,total,finalAmount){
       +'<b>Subtotal:</b> '+fmtRp(total)+'\n'
       +'<b>Total Dibayar:</b> '+fmtRp(finalAmount)+'\n\n'
       +'---\n<i>VIP Hunter Auto Report</i>';
-    var rawTg=(CFG.adminTg||'').trim();
-    // Jika numerik (ID) kirim apa adanya, jika username pastikan ada @ di depan
-    var chatId=/^\-?\d+$/.test(rawTg)?rawTg:('@'+rawTg.replace(/^@/,''));
+    var chatId=CFG.adminTg;
     var r=await fetch('https://api.telegram.org/bot'+CFG.botToken+'/sendMessage',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({chat_id:chatId,text:msg,parse_mode:'HTML'})
@@ -500,7 +498,7 @@ function parseNum(s){return parseInt((s||'0').replace(/[^0-9]/g,''))||0;}
 function fmtRp(n){return 'Rp '+n.toLocaleString('id-ID');}
 function escHtml(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function togglePw(id){var i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
-function hubungiAdmin(){if(!CFG.adminTg){toast('Admin belum dikonfigurasi','err');return;}var tg=(CFG.adminTg||'').trim().replace(/^@/,'');if(/^\-?\d+$/.test(tg)){toast('Chat ID: '+tg+' — buka Telegram dan cari bot/admin','ok');}else{window.open('https://t.me/'+tg,'_blank');}}
+function hubungiAdmin(){if(!CFG.adminTg){toast('Admin belum dikonfigurasi','err');return;}var tg=CFG.adminTg.replace(/^@/,'');if(/^\-?\d+$/.test(tg)){toast('Hubungi admin di Telegram (ID: '+tg+')','ok');}else{window.open('https://t.me/'+tg,'_blank');}}
 function applyBranding(){var wm=document.getElementById('watermarkEl'),an=document.getElementById('appNameEl');if(wm&&CFG.watermark)wm.textContent=CFG.watermark;if(an&&CFG.appName)an.textContent=CFG.appName;document.title=CFG.appName||'VIP Hunter';}
 function updateCfgStatus(){var sw=document.getElementById('cfgSaweriaStatus'),bt=document.getElementById('cfgBotStatus'),at=document.getElementById('cfgAdminTgStatus');if(sw)sw.textContent=CFG.saweriaUsername||'Belum diisi';if(bt)bt.textContent=CFG.botToken?CFG.botToken.split(':')[0]+':*****':'Tidak digunakan';if(at)at.textContent=CFG.adminTg||'Belum diisi';var b=document.getElementById('setupBanner');if(b)b.style.display=!CFG.saweriaUsername?'flex':'none';}
 var currentScreen='s-shop';
@@ -578,7 +576,7 @@ function doLogin(){var pw=document.getElementById('pwInput').value;if(pw===CFG.a
 document.getElementById('loginBtn').onclick=doLogin;
 document.getElementById('pwInput').onkeydown=function(e){if(e.key==='Enter')doLogin();};
 document.getElementById('pwEye').onclick=function(){togglePw('pwInput');};
-document.getElementById('saveCfgBtn').addEventListener('click',async function(){if(!isAdmin){toast('Harus login admin dulu!','err');return;}var btn=this;btn.disabled=true;btn.textContent='Menyimpan...';CFG.supabaseUrl=(document.getElementById('setCfgSbUrl').value||'').trim();CFG.supabaseKey=(document.getElementById('setCfgSbKey').value||'').trim();saveLocalCFG();var newPw=(document.getElementById('setCfgPw').value||'').trim();var patch={saweriaUsername:(document.getElementById('setCfgSaweriaUser').value||'').trim(),saweriaUserId:(document.getElementById('setCfgSaweriaId').value||'').trim(),qrisDuration:parseInt(document.getElementById('setCfgQrisDur').value||'60')||60,botToken:(document.getElementById('setCfgBotToken').value||'').trim(),appName:(document.getElementById('setCfgAppName').value||'').trim()||'VIP Hunter',watermark:(document.getElementById('setCfgWatermark').value||'').trim(),adminTg:(document.getElementById('setCfgAdminTg').value||'').trim(),};if(newPw)patch.adminPassword=newPw;await persistCFG(patch);updateCfgStatus();applyBranding();await loadVIP();toast('Pengaturan disimpan!','ok');btn.disabled=false;btn.textContent='Simpan Semua Pengaturan';});
+document.getElementById('saveCfgBtn').addEventListener('click',async function(){if(!isAdmin){toast('Harus login admin dulu!','err');return;}var btn=this;btn.disabled=true;btn.textContent='Menyimpan...';CFG.supabaseUrl=(document.getElementById('setCfgSbUrl').value||'').trim();CFG.supabaseKey=(document.getElementById('setCfgSbKey').value||'').trim();saveLocalCFG();var newPw=(document.getElementById('setCfgPw').value||'').trim();var patch={saweriaUsername:(document.getElementById('setCfgSaweriaUser').value||'').trim(),saweriaUserId:(document.getElementById('setCfgSaweriaId').value||'').trim(),qrisDuration:parseInt(document.getElementById('setCfgQrisDur').value||'60')||60,botToken:(document.getElementById('setCfgBotToken').value||'').trim(),appName:(document.getElementById('setCfgAppName').value||'').trim()||'VIP Hunter',watermark:(document.getElementById('setCfgWatermark').value||'').trim(),adminTg:(document.getElementById('setCfgAdminTg').value||'').trim().replace(/^@/,''),};if(newPw)patch.adminPassword=newPw;await persistCFG(patch);updateCfgStatus();applyBranding();await loadVIP();toast('Pengaturan disimpan!','ok');btn.disabled=false;btn.textContent='Simpan Semua Pengaturan';});
 function resetImg(){uploadedImg='';var pv=document.getElementById('imgPreview');pv.src='';pv.style.display='none';document.getElementById('imgUpload').querySelector('.up-ico').style.display='block';document.getElementById('imgUpload').querySelector('.up-hint').style.display='block';document.getElementById('fileInput').value='';}
 function clearForm(){['fId','fName','fDesc','fFeats','fPrice','fPer','fVipLinks'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('fTier').value='tier-permanen';resetImg();}
 function openAddModal(){isEdit=false;clearForm();document.getElementById('modalTitle').textContent='TAMBAH PAKET';document.getElementById('modalSub').textContent='Isi detail paket VIP baru.';document.getElementById('saveProd').textContent='Simpan Paket';openModal('prodModal');}
