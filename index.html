@@ -875,6 +875,23 @@ async function onPaymentSuccess(orderId,transactionId){
       }
     }
     if(hasSB()){try{await sbPatch('orders',orderId,{invite_links:resolvedLinks});}catch(e){}}
+
+    // Kirim notifikasi ke admin Telegram
+    if(CFG.botToken && CFG.adminTg){
+      try{
+        await edgePost({
+          action:       'notify_admin',
+          bot_token:    CFG.botToken,
+          admin_tg:     CFG.adminTg,
+          order_id:     orderId,
+          buyer_name:   buyerName,
+          items:        currentCartSnapshot,
+          total:        cartTotal(),
+          final_amount: currentCartSnapshot.reduce(function(s,x){return s+parseNum(x.price)*x.qty;},0),
+        }, 8000);
+      }catch(e){console.warn('[Notif Admin Error]',e);}
+    }
+
     showSuccessScreen(orderId,resolvedLinks,hasOnceLinks);
     document.getElementById('botPayBtn').disabled=false;
     document.getElementById('botPayBtn').textContent='📲 Buat QRIS & Bayar Sekarang';
