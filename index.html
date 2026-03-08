@@ -547,8 +547,8 @@ async function sbFetch(url,opts,ms){
   catch(e){clearTimeout(tid);throw e;}
 }
 async function sbGet(tbl,q){var r=await sbFetch(getSB()+'/'+tbl+(q||'?select=*&order=created_at.asc'),{headers:getSBH()});if(!r.ok)throw new Error(await r.text());return r.json();}
-async function sbPost(tbl,d){var r=await sbFetch(getSB()+'/'+tbl,{method:'POST',headers:Object.assign({'Prefer':'return=representation'},getSBH()),body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
-async function sbPatch(tbl,id,d){var r=await sbFetch(getSB()+'/'+tbl+'?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Prefer':'return=minimal'},getSBH()),body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());}
+async function sbPost(tbl,d){var h=Object.assign({'Prefer':'return=representation','Accept':'application/json'},getSBH());var r=await sbFetch(getSB()+'/'+tbl,{method:'POST',headers:h,body:JSON.stringify(d)});if(!r.ok){var et=await r.text();throw new Error('HTTP '+r.status+': '+et);}return r.json();}
+async function sbPatch(tbl,id,d){var h=Object.assign({'Prefer':'return=minimal','Accept':'application/json'},getSBH());var r=await sbFetch(getSB()+'/'+tbl+'?id=eq.'+id,{method:'PATCH',headers:h,body:JSON.stringify(d)});if(!r.ok){var et=await r.text();throw new Error('HTTP '+r.status+': '+et);}}
 async function sbDelete(tbl,id){var r=await sbFetch(getSB()+'/'+tbl+'?id=eq.'+id,{method:'DELETE',headers:getSBH()});if(!r.ok)throw new Error(await r.text());}
 
 // Upsert app_config key
@@ -1143,7 +1143,7 @@ document.getElementById('saveProd').addEventListener('click',async function(){
   var data={name:name,tier:document.getElementById('fTier').value,price:document.getElementById('fPrice').value.trim()||'0',per:document.getElementById('fPer').value.trim()||'',description:desc,features:fr?fr.split('\n').map(function(f){return f.trim();}).filter(Boolean):[],img:uploadedImg,vip_links:vipLinksArr,vip_link:''};
   try{
     if(isEdit){await sbPatch('vip_packages',document.getElementById('fId').value,data);toast('✅ Paket diperbarui!','ok');}
-    else{data.id='vip_'+Date.now();var r=await fetch(getSB()+'/vip_packages',{method:'POST',headers:Object.assign({'Prefer':'return=representation'},getSBH()),body:JSON.stringify(data)});if(!r.ok)throw new Error(await r.text());toast('✅ Paket ditambahkan!','ok');}
+    else{data.id='vip_'+Date.now();await sbPost('vip_packages',data);toast('✅ Paket ditambahkan!','ok');}
     closeModal('prodModal');await loadVIP();
   }catch(e){toast('❌ Gagal: '+e.message,'err');}
   btn.disabled=false;btn.textContent=isEdit?'💾 Simpan Perubahan':'💾 Simpan Paket';
