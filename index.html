@@ -487,7 +487,7 @@ async function tgGenerateInviteLink(chatId,name){if(!CFG.botToken||!chatId)retur
 function parseVipLinks(raw){if(!raw)return[];return raw.split('\n').map(function(line){line=line.trim();if(!line)return null;var p=line.indexOf('|');if(p===-1)return null;var n=line.slice(0,p).trim(),c=line.slice(p+1).trim();if(!n||!c)return null;return{name:n,chat_id:c,link:''};}).filter(Boolean);}
 function serializeVipLinks(arr){if(!arr||!arr.length)return '';return arr.map(function(x){return x.name+'|'+x.chat_id;}).join('\n');}
 var allVIP=[],cart=[],isAdmin=false,isEdit=false,uploadedImg='',pendingDelId=null;
-var currentOrderId=null,currentTransactionId=null,currentCartSnapshot=[];
+var currentOrderId=null,currentTransactionId=null,currentCartSnapshot=[],currentFinalAmount=0;
 var pollTimer=null,expireTimer=null,expireSeconds=0;
 var buyerName='',buyerId='web_'+Date.now();
 try{var sid=localStorage.getItem('vip_sid');if(sid)buyerId=sid;else localStorage.setItem('vip_sid',buyerId);}catch(e){}
@@ -523,6 +523,7 @@ document.getElementById('botPayBtn').addEventListener('click',async function(){
   buyerName=(document.getElementById('guestName').value||'').trim()||'Pembeli';
   var btn=document.getElementById('botPayBtn');btn.disabled=true;btn.textContent='Membuat QRIS...';
   var total=cartTotal(),orderId='VH'+Date.now(),uniqueCode=Math.floor(Math.random()*200)+1,finalAmount=total+uniqueCode;
+  currentFinalAmount=finalAmount;
   var desc='VIP Hunter - '+cart.map(function(x){return x.name;}).join(', ');
   currentCartSnapshot=cart.map(function(x){return Object.assign({},x);});
   try{
@@ -559,7 +560,9 @@ async function onPaymentSuccess(orderId,transactionId){
     if(hasSB()){try{await sbPatch('orders',orderId,{invite_links:resolvedLinks});}catch(e){}}
     // Kirim notifikasi ke admin Telegram
     var total=currentCartSnapshot.reduce(function(s,x){return s+parseNum(x.price)*x.qty;},0);
-    await notifyAdmin(orderId,currentCartSnapshot,total,total);
+    console.log('[Notif Debug] botToken:',CFG.botToken?CFG.botToken.split(':')[0]+':*****':'KOSONG');
+    console.log('[Notif Debug] adminTg:',CFG.adminTg||'KOSONG');
+    await notifyAdmin(orderId,currentCartSnapshot,total,currentFinalAmount||total);
     showSuccessScreen(orderId,resolvedLinks,hasOnceLinks);
     document.getElementById('botPayBtn').disabled=false;document.getElementById('botPayBtn').textContent='Buat QRIS & Bayar Sekarang';
   }catch(e){console.error('[onPaymentSuccess]',e);toast('Bayar sukses!','ok');showSuccessScreen(orderId,[],false);}
