@@ -233,7 +233,7 @@ body.admin-mode .add-card{display:flex;}
       <div class="sec-hd"><span class="sec-title">PAKET VIP</span><span class="sec-tag-sm" id="tProduk">0 paket</span></div>
       <div class="vip-list" id="grid"><div style="grid-column:1/-1;text-align:center;padding:40px 0;"><div class="spinner"></div><p style="color:var(--hint);font-size:.8rem;">Memuat paket...</p></div></div>
     </div>
-    <div style="height:16px;"></div> 
+    <div style="height:16px;"></div>
   </div>
 </div>
 <div class="screen" id="s-cart">
@@ -444,8 +444,8 @@ body.admin-mode .add-card{display:flex;}
 <div class="watermark" id="watermarkEl"></div>
 <script>
 var CFG={adminPassword:'Malik10_',supabaseUrl:'https://lgnkdftvfkwfiaeaaqwf.supabase.co',supabaseKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnbmtkZnR2Zmt3ZmlhZWFhcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NzM3ODMsImV4cCI6MjA4ODU0OTc4M30.izYzQotTmlvP5unSGi0plRHoUjHpBCWg9RMUyaPgzfk',watermark:'@vip_hunter',appName:'VIP Hunter',saweriaUsername:'',saweriaUserId:'',botToken:'',adminTg:'',adminChatId:'',pollInterval:10000,qrisDuration:60};
-function loadLocalCFG(){try{var s=localStorage.getItem('vhcfg');if(s){var saved=JSON.parse(s);if(saved.supabaseUrl)CFG.supabaseUrl=saved.supabaseUrl;if(saved.supabaseKey)CFG.supabaseKey=saved.supabaseKey;if(saved.saweriaUsername)CFG.saweriaUsername=saved.saweriaUsername;if(saved.saweriaUserId)CFG.saweriaUserId=saved.saweriaUserId;if(saved.botToken)CFG.botToken=saved.botToken;if(saved.adminTg)CFG.adminTg=saved.adminTg;if(saved.adminChatId)CFG.adminChatId=saved.adminChatId;if(saved.qrisDuration)CFG.qrisDuration=saved.qrisDuration;if(saved.watermark)CFG.watermark=saved.watermark;if(saved.appName)CFG.appName=saved.appName;if(saved.adminPassword)CFG.adminPassword=saved.adminPassword;}}catch(e){}}
-function saveLocalCFG(){try{localStorage.setItem('vhcfg',JSON.stringify({supabaseUrl:CFG.supabaseUrl,supabaseKey:CFG.supabaseKey,saweriaUsername:CFG.saweriaUsername,saweriaUserId:CFG.saweriaUserId,botToken:CFG.botToken,adminTg:CFG.adminTg,adminChatId:CFG.adminChatId,qrisDuration:CFG.qrisDuration,watermark:CFG.watermark,appName:CFG.appName,adminPassword:CFG.adminPassword}));}catch(e){}}
+function loadLocalCFG(){try{var s=localStorage.getItem('vhcfg_hunter');if(s){var saved=JSON.parse(s);if(saved.supabaseUrl)CFG.supabaseUrl=saved.supabaseUrl;if(saved.supabaseKey)CFG.supabaseKey=saved.supabaseKey;if(saved.saweriaUsername)CFG.saweriaUsername=saved.saweriaUsername;if(saved.saweriaUserId)CFG.saweriaUserId=saved.saweriaUserId;if(saved.botToken)CFG.botToken=saved.botToken;if(saved.adminTg)CFG.adminTg=saved.adminTg;if(saved.adminChatId)CFG.adminChatId=saved.adminChatId;if(saved.qrisDuration)CFG.qrisDuration=saved.qrisDuration;if(saved.watermark)CFG.watermark=saved.watermark;if(saved.appName)CFG.appName=saved.appName;if(saved.adminPassword)CFG.adminPassword=saved.adminPassword;}}catch(e){}}
+function saveLocalCFG(){try{localStorage.setItem('vhcfg_hunter',JSON.stringify({supabaseUrl:CFG.supabaseUrl,supabaseKey:CFG.supabaseKey,saweriaUsername:CFG.saweriaUsername,saweriaUserId:CFG.saweriaUserId,botToken:CFG.botToken,adminTg:CFG.adminTg,adminChatId:CFG.adminChatId,qrisDuration:CFG.qrisDuration,watermark:CFG.watermark,appName:CFG.appName,adminPassword:CFG.adminPassword}));}catch(e){}}
 loadLocalCFG();
 function getSB(){return (CFG.supabaseUrl||'').replace(/\/$/,'')+'/rest/v1';}
 function getSBH(){return {'apikey':CFG.supabaseKey,'Authorization':'Bearer '+CFG.supabaseKey,'Content-Type':'application/json'};}
